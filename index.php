@@ -20,7 +20,7 @@ function getfiles($path) {
 			// echo $path . '/' . $afile . '<br />';
 			$xml = simplexml_load_string(file_get_contents($path . '/' . $afile, true));
 			// print_r($xml->File);
-			echo '<a style="font-size:13px;" href="/tmp/' . $afile . '">' . $xml['ListName'] . '[' . count($xml->File) . ']' . '</a>&nbsp;<a style="font-size:13px;" href="?id=' . explode(".", $afile)[0] . '&opt=d">删除</a><br>';
+			echo '<a style="font-size:13px;" href="tmp/' . $afile . '">' . $xml['ListName'] . '[' . count($xml->File) . ']' . '</a>&nbsp;<a style="font-size:13px;" href="?id=' . explode(".", $afile)[0] . '&opt=d">删除</a><br>';
 		}
 	}
 } //简单的demo,列出当前目录下所有的文件
