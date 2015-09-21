@@ -6,15 +6,44 @@ header('Content-Type:text/html;charset=UTF-8');
 include 'simple_html_dom.php';
 
 $id = intval(@$_GET['id']);
+
+function getfiles($path) {
+	echo '<br><br>已转换的文件：<br>';
+	foreach (scandir($path) as $afile) {
+		if ($afile == '.' || $afile == '..') {
+			continue;
+		}
+
+		if (is_dir($path . '/' . $afile)) {
+			// getfiles($path . '/' . $afile);
+		} else {
+			// echo $path . '/' . $afile . '<br />';
+			$xml = simplexml_load_string(file_get_contents($path . '/' . $afile, true));
+			// print_r($xml->File);
+			echo '<a style="font-size:13px;" href="/tmp/' . $afile . '">' . $xml['ListName'] . '[' . count($xml->File) . ']' . '</a>&nbsp;<a style="font-size:13px;" href="?id=' . explode(".", $afile)[0] . '&opt=d">删除</a><br>';
+		}
+	}
+} //简单的demo,列出当前目录下所有的文件
+
 // var_dump($id);
 if ($id == 0 || !isset($_GET['id'])) {
-	exit('请输入用户ID：<input name="1" /><a target="_blank" href="javascript:window.location.href=\'index.php?id=\'+document.getElementsByName(\'1\')[0].value">GO</a><br>请注意，由于过快的请求会导致虾米封禁，so请求时间可能会很长（通常400首/分），您可以关闭该页面，并稍后访问打开的链接查询导出状态~
+
+	echo ('请输入用户ID：<input name="1" /><a target="_blank" href="javascript:window.location.href=\'index.php?id=\'+document.getElementsByName(\'1\')[0].value">GO</a>
+<br>
+		<br>新的一次抓取点击GO之后，若挂起，请再次点击GO查看进程。
+		<br>请注意，由于过快的请求会导致虾米封禁，so请求时间可能会很长（通常300~400首/分），您可以关闭该页面，并稍后访问打开的链接查询导出状态~
 <br>
 格式：http://rabbit.moemee.com/xiamiconverter/index.php?id=你的ID<br>
-功能很简陋请不要介意
 		');
+	getfiles('./tmp');
+	exit();
 }
 
+if (isset($_GET['opt']) && $_GET['opt'] == 'd') {
+	unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".kgl");
+	header('location:index.php');
+	exit();
+}
 if (file_exists("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR")) {
 	// $tmp = fread(, "r");
 	$content = file_get_contents("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR");
