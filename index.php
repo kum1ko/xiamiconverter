@@ -1,9 +1,11 @@
-<title>虾米转换器 v1.1</title>
 <?php
+
+$secretKey = 'MyriaIsBaka';
 set_time_limit(0);
 ini_set("max_execution_time", "3600");
 ignore_user_abort(true);
 header('Content-Type:text/html;charset=UTF-8');
+echo '<title>虾米转换器 v1.1</title>';
 include 'simple_html_dom.php';
 $id = intval(@$_GET['id']);
 
@@ -12,6 +14,7 @@ function get_extension($file) {
 }
 
 function getfiles($path) {
+	global $secretKey;
 	echo '<br><br>已转换的文件：<br>';
 	foreach (scandir($path) as $afile) {
 		if ($afile == '.' || $afile == '..') {
@@ -25,7 +28,14 @@ function getfiles($path) {
 				// echo $path . '/' . $afile . '<br />';
 				$xml = simplexml_load_string(file_get_contents($path . '/' . $afile, true));
 				// print_r($xml->File);
-				echo '<a style="font-size:13px;" href="down.php?id=' . $afile . '">' . $xml['ListName'] . '[' . count($xml->File) . ']' . '</a>&nbsp;<a style="font-size:13px;" href="?id=' . explode(".", $afile)[0] . '&opt=d">删除</a><br>';
+				echo '<a style="font-size:13px;" href="down.php?id=' . $afile . '">' . $xml['ListName'] . '[' . count($xml->File) . ']' . '</a>&nbsp;';
+
+				if (isset($_GET['key']) && @$_GET['key'] == $secretKey) {
+					echo '<a style="font-size:13px;" href="?id=' . explode(".", $afile)[0] . '&opt=d&key=' . $secretKey . '">删除</a><br>';
+				} else {
+					echo '<br>';
+				}
+
 			}
 
 		}
@@ -67,7 +77,11 @@ if ($id == 0 || !isset($_GET['id'])) {
 }
 
 if (isset($_GET['opt']) && $_GET['opt'] == 'd') {
-	unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".kgl");
+	if (isset($_GET['key']) && @$_GET['key'] == $secretKey) {
+		@unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".kgl");
+		header('location:index.php?key=' . $secretKey . '');
+	}
+
 	header('location:index.php');
 	exit();
 }
@@ -217,8 +231,8 @@ function GET($id = '') {
 	array_shift($farray);
 	if (count($farray) < 1) {
 		// 删除队列文件
-		unlink("tmp" . DIRECTORY_SEPARATOR . "queue.queue");
-		unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR");
+		@unlink("tmp" . DIRECTORY_SEPARATOR . "queue.queue");
+		@unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR");
 		return false;
 	} else {
 		foreach ($farray as $key => $value) {
@@ -230,11 +244,11 @@ function GET($id = '') {
 		}
 	}
 
-	unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR");
+	@unlink("tmp" . DIRECTORY_SEPARATOR . "" . $id . ".serverTmpARR");
 	GET($farray[0]);
 	// header("Location:down.php?id=" . $id . "");
 }
 GET($id);
-unlink("tmp" . DIRECTORY_SEPARATOR . "queue.queue");
+@unlink("tmp" . DIRECTORY_SEPARATOR . "queue.queue");
 exit();
 ?>
